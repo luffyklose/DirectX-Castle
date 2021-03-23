@@ -700,8 +700,8 @@ void ShapesApp::BuildRootSignature()
 void ShapesApp::BuildDescriptorHeaps()
 {
     //
-    // Create the SRV heap.
-    //
+   // Create the SRV heap.
+   //
     D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
     srvHeapDesc.NumDescriptors = 9; //  Change when adding more descripotrsaf
     srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
