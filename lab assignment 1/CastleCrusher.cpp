@@ -498,46 +498,39 @@ void ShapesApp::UpdateMainPassCB(const GameTimer& gt)
 
     //lights
     mMainPassCB.AmbientLight = { 0.4f, 0.4f, 0.4f, 1.0f };
-    //directional light
+
+	//directional light
     mMainPassCB.Lights[0].Direction = { -0.5f, -0.35f, 0.5f };
     mMainPassCB.Lights[0].Strength = { 1.0f, 0.5, 0.3f };
-    //pointlights
-    mMainPassCB.Lights[1].Position = { -5.0f, 5.0f, -30.0f };
-    mMainPassCB.Lights[1].Strength = { 1.0f, 0.0f, 0.0f };
-    mMainPassCB.Lights[2].Position = { 5.0f, 5.0f, -30.0f };
-    mMainPassCB.Lights[2].Strength = { 1.0f, 0.0f, 0.0f };
-	
-    //back rainbow pointlights
-    //yellow
-    mMainPassCB.Lights[3].Position = { -5.0f, 5.0f, 20.0f };
-    mMainPassCB.Lights[3].Strength = { 1.0f, 1.0f, 0.0f };
-	
-    //green
-    mMainPassCB.Lights[4].Position = { 5.0f, 5.0f, 20.0f };
-    mMainPassCB.Lights[4].Strength = { 0.0f, 1.0f, 0.0f };
-	
-    //red
-    mMainPassCB.Lights[5].Position = { -10.0f, 5.0f, 20.0f };
+
+	//Front Wall 
+    mMainPassCB.Lights[1].Position = { -15.0f, 5.0f, -30.0f };
+    mMainPassCB.Lights[1].Strength = { 1.0f, 1.0f, 0.0f };
+    mMainPassCB.Lights[2].Position = { 15.0f, 5.0f, -30.0f };
+    mMainPassCB.Lights[2].Strength = { 1.0f, 1.0f, 0.0f };
+
+	//Columns
+    mMainPassCB.Lights[3].Position = { -26.0f, 5.0f, -30.0f };
+    mMainPassCB.Lights[3].Strength = { 1.0f, 0.0f, 0.0f };
+    mMainPassCB.Lights[4].Position = { 26.0f, 5.0f, -30.0f };
+    mMainPassCB.Lights[4].Strength = { 1.0f, 0.0f, 0.0f };
+    mMainPassCB.Lights[5].Position = { -26.0f, 5.0f, 30.0f };
     mMainPassCB.Lights[5].Strength = { 1.0f, 0.0f, 0.0f };
+    mMainPassCB.Lights[6].Position = { 26.0f, 5.0f, 30.0f };
+    mMainPassCB.Lights[6].Strength = { 1.0f, 0.0f, 0.0f };
 
-    //blue
-    mMainPassCB.Lights[6].Position = { 10.0f, 5.0f, 20.0f };
-    mMainPassCB.Lights[6].Strength = { 0.0, 0.0f, 1.0f };
-
-    //cyan
-    mMainPassCB.Lights[7].Position = { 15.0f, 5.0f, 20.0f };
-    mMainPassCB.Lights[7].Strength = { 0.0, 1.0f, 1.0f };
-
-    //purple
-    mMainPassCB.Lights[8].Position = { -15.0f, 5.0f, 20.0f };
-    mMainPassCB.Lights[8].Strength = { 1.0, 0.0f, 1.0f };
-	
+	//Diamonds
+    mMainPassCB.Lights[7].Position = { 0.0f, 21.5f, -2.0f };
+    mMainPassCB.Lights[7].Strength = { 0.0f, 0.0f, 1.0f };
+    mMainPassCB.Lights[8].Position = { 0.0f, 12.5f, 12.5f };
+    mMainPassCB.Lights[8].Strength = { 0.0f, 0.0f, 1.0f };
+    
     //spotlight
-    mMainPassCB.Lights[9].Position = { 0.0f, 22.0f, -10.0f };
-    mMainPassCB.Lights[9].Direction = { 0.0f, -1.0f, 0.0f };
-    mMainPassCB.Lights[9].SpotPower = 1.0f;
-    mMainPassCB.Lights[9].Strength = { 2.1f, 2.1f, 2.1f };
-    mMainPassCB.Lights[9].FalloffEnd = 20.0f;
+    //mMainPassCB.Lights[9].Position = { 0.0f, 22.0f, -10.0f };
+    //mMainPassCB.Lights[9].Direction = { 0.0f, -1.0f, 0.0f };
+    //mMainPassCB.Lights[9].SpotPower = 1.0f;
+    //mMainPassCB.Lights[9].Strength = { 2.1f, 2.1f, 2.1f };
+    //mMainPassCB.Lights[9].FalloffEnd = 20.0f;
 
     auto currPassCB = mCurrFrameResource->PassCB.get();
     currPassCB->CopyData(0, mMainPassCB);
@@ -1175,7 +1168,7 @@ void ShapesApp::BuildTreeSpritesGeometry()
         XMFLOAT3 Pos;
         XMFLOAT2 Size;
     };
-    static const int treeCount = 15;
+    static const int treeCount = 17;
     int TreeIndex = 0;
     std::array<TreeSpriteVertex, treeCount> vertices;
     for (UINT i = 0; i < 5; ++i)
@@ -1211,10 +1204,18 @@ void ShapesApp::BuildTreeSpritesGeometry()
         TreeIndex++;
     }
 
-    std::array<std::uint16_t, 16> indices =
+    vertices[TreeIndex].Pos = XMFLOAT3(-17.5, 8.0, -35.5);
+    vertices[TreeIndex].Size = XMFLOAT2(20.0f, 20.0f);
+    TreeIndex++;
+
+    vertices[TreeIndex].Pos = XMFLOAT3(17.5, 8.0, -35.5);
+    vertices[TreeIndex].Size = XMFLOAT2(20.0f, 20.0f);
+    TreeIndex++;
+	
+    std::array<std::uint16_t, 17> indices =
     {
         0, 1, 2, 3, 4, 5, 6, 7,
-        8, 9, 10, 11, 12, 13, 14
+        8, 9, 10, 11, 12, 13, 14, 15,16
     };
 
     const UINT vbByteSize = (UINT)vertices.size() * sizeof(TreeSpriteVertex);
