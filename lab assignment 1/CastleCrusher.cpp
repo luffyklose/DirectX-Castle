@@ -139,7 +139,12 @@ private:
 
     PassConstants mMainPassCB;
 
-    XMFLOAT3 mEyePos = { 0.0f, 0.0f, 0.0f };
+    XMVECTOR position = XMVectorSet(-20.0f, 70.0f, -120.5f, 0.0f)
+        , frontVec = XMVectorSet(0.0f, 0.0f, .0f, 0.0f)
+        , worldUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), upVec, rightVec; // Set by function
+    float pitch = -2.8, yaw = 4.5f;
+
+    //XMFLOAT3 mEyePos = { 0.0f, 0.0f, 0.0f };
     XMFLOAT4X4 mView = MathHelper::Identity4x4();
     XMFLOAT4X4 mProj = MathHelper::Identity4x4();
 
@@ -380,10 +385,23 @@ void ShapesApp::OnMouseMove(WPARAM btnState, int x, int y)
 
 void ShapesApp::OnKeyboardInput(const GameTimer& gt)
 {
+    if (GetAsyncKeyState('W') & 0x8000) {
+        position += frontVec * 0.9f;
+    }
+    if (GetAsyncKeyState('S') & 0x8000) {
+        position -= frontVec * 0.9f;
+    }
+    if (GetAsyncKeyState('A') & 0x8000) {
+        position += rightVec * 0.9f;
+    }
+    if (GetAsyncKeyState('D') & 0x8000) {
+        position -= rightVec * 0.9f;
+    }
 }
 
 void ShapesApp::UpdateCamera(const GameTimer& gt)
 {
+	/*
     // Convert Spherical to Cartesian coordinates.
     mEyePos.x = mRadius * sinf(mPhi) * cosf(mTheta);
     mEyePos.z = mRadius * sinf(mPhi) * sinf(mTheta);
@@ -395,6 +413,19 @@ void ShapesApp::UpdateCamera(const GameTimer& gt)
     XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
     XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
+    XMStoreFloat4x4(&mView, view);
+	*/
+
+    frontVec = XMVectorSet(cos((yaw)) * cos((pitch)), sin((pitch)), sin((yaw)) * cos((pitch)), 0.0f);
+
+    frontVec = XMVector3Normalize(frontVec);
+    rightVec = XMVector3Normalize(XMVector3Cross(frontVec, worldUp));
+    upVec = XMVector3Normalize(XMVector3Cross(rightVec, frontVec));
+
+    XMMATRIX view = XMMatrixLookAtLH(position, // Camera position
+        position + frontVec, // Look target
+        upVec); // Up vector);
+
     XMStoreFloat4x4(&mView, view);
 }
 
@@ -488,7 +519,10 @@ void ShapesApp::UpdateMainPassCB(const GameTimer& gt)
     XMStoreFloat4x4(&mMainPassCB.InvProj, XMMatrixTranspose(invProj));
     XMStoreFloat4x4(&mMainPassCB.ViewProj, XMMatrixTranspose(viewProj));
     XMStoreFloat4x4(&mMainPassCB.InvViewProj, XMMatrixTranspose(invViewProj));
-    mMainPassCB.EyePosW = mEyePos;
+    //mMainPassCB.EyePosW = mEyePos;
+    mMainPassCB.EyePosW.x = XMVectorGetX(position);
+    mMainPassCB.EyePosW.y = XMVectorGetX(position);
+    mMainPassCB.EyePosW.z = XMVectorGetX(position);
     mMainPassCB.RenderTargetSize = XMFLOAT2((float)mClientWidth, (float)mClientHeight);
     mMainPassCB.InvRenderTargetSize = XMFLOAT2(1.0f / mClientWidth, 1.0f / mClientHeight);
     mMainPassCB.NearZ = 1.0f;
