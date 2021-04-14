@@ -211,6 +211,7 @@ bool ShapesApp::Initialize()
 
     mCamera.SetPosition(0.0f, 30.0f, -50.0f);
     XMStoreFloat3(&mCamera.bounds.Center, mCamera.GetPosition());
+    XMStoreFloat3(&mCamera.bounds.Extents, {1.0f,1.0f,1.0f});
 
     LoadTextures();
     BuildRootSignature();
@@ -1634,7 +1635,7 @@ void ShapesApp::BuildRenderItems()
 
     auto treeSpritesRitem = std::make_unique<RenderItem>();
     treeSpritesRitem->World = MathHelper::Identity4x4();
-    treeSpritesRitem->ObjCBIndex = 3;
+    treeSpritesRitem->ObjCBIndex = Index++;
     treeSpritesRitem->Mat = mMaterials["treeSprites"].get();
     treeSpritesRitem->Geo = mGeometries["treeSpritesGeo"].get();
     //step2
@@ -1905,8 +1906,6 @@ void ShapesApp::BuildRenderItems()
     pyramidRitem->IndexCount = pyramidRitem->Geo->DrawArgs["pyramid"].IndexCount;
     pyramidRitem->StartIndexLocation = pyramidRitem->Geo->DrawArgs["pyramid"].StartIndexLocation;
     pyramidRitem->BaseVertexLocation = pyramidRitem->Geo->DrawArgs["pyramid"].BaseVertexLocation;
-    //pyramidRitem->bounds.Center = { 0.0f, 10.0f, 0.0f };
-    //pyramidRitem->bounds.Extents = { 12.5f, 12.5f, 12.5f };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(pyramidRitem.get());
     mAllRitems.push_back(std::move(pyramidRitem));
 
@@ -1976,7 +1975,7 @@ void ShapesApp::BuildRenderItems()
 
 
     //Pillars & Cones & Spheres
-    UINT objCBIndex = Index++;
+    //UINT objCBIndex = Index++;
     for (int i = 0; i < 2; ++i)
     {
         auto leftCylRitem = std::make_unique<RenderItem>();
@@ -1994,7 +1993,7 @@ void ShapesApp::BuildRenderItems()
         XMMATRIX rightSphereWorld = XMMatrixTranslation(-25.0f + i * 50, 24.5f, -24.0);
 
         XMStoreFloat4x4(&leftCylRitem->World, leftCylWorld);
-        leftCylRitem->ObjCBIndex = objCBIndex++;
+        leftCylRitem->ObjCBIndex = Index++;
         leftCylRitem->Mat = mMaterials["roof"].get();
         leftCylRitem->Geo = mGeometries["shapeGeo"].get();
         leftCylRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -2004,7 +2003,7 @@ void ShapesApp::BuildRenderItems()
         mRitemLayer[(int)RenderLayer::Opaque].push_back(leftCylRitem.get());
 
         XMStoreFloat4x4(&rightCylRitem->World, rightCylWorld);
-        rightCylRitem->ObjCBIndex = objCBIndex++;
+        rightCylRitem->ObjCBIndex = Index++;
         rightCylRitem->Mat = mMaterials["roof"].get();
         rightCylRitem->Geo = mGeometries["shapeGeo"].get();
         rightCylRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -2014,7 +2013,7 @@ void ShapesApp::BuildRenderItems()
         mRitemLayer[(int)RenderLayer::Opaque].push_back(rightCylRitem.get());
 
         XMStoreFloat4x4(&leftConeRitem->World, leftConeWorld);
-        leftConeRitem->ObjCBIndex = objCBIndex++;
+        leftConeRitem->ObjCBIndex = Index++;
         leftConeRitem->Mat = mMaterials["stone"].get();
         leftConeRitem->Geo = mGeometries["shapeGeo"].get();
         leftConeRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -2024,7 +2023,7 @@ void ShapesApp::BuildRenderItems()
         mRitemLayer[(int)RenderLayer::Opaque].push_back(leftConeRitem.get());
 
         XMStoreFloat4x4(&rightConeRitem->World, rightConeWorld);
-        rightConeRitem->ObjCBIndex = objCBIndex++;
+        rightConeRitem->ObjCBIndex = Index++;
         rightConeRitem->Mat = mMaterials["stone"].get();
         rightConeRitem->Geo = mGeometries["shapeGeo"].get();
         rightConeRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -2034,7 +2033,7 @@ void ShapesApp::BuildRenderItems()
         mRitemLayer[(int)RenderLayer::Opaque].push_back(rightConeRitem.get());
 
         XMStoreFloat4x4(&leftSphereRitem->World, leftSphereWorld);
-        leftSphereRitem->ObjCBIndex = objCBIndex++;
+        leftSphereRitem->ObjCBIndex = Index++;
         leftSphereRitem->Mat = mMaterials["ice"].get();
         leftSphereRitem->Geo = mGeometries["shapeGeo"].get();
         leftSphereRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -2044,7 +2043,7 @@ void ShapesApp::BuildRenderItems()
         mRitemLayer[(int)RenderLayer::Opaque].push_back(leftSphereRitem.get());
 
         XMStoreFloat4x4(&rightSphereRitem->World, rightSphereWorld);
-        rightSphereRitem->ObjCBIndex = objCBIndex++;
+        rightSphereRitem->ObjCBIndex = Index++;
         rightSphereRitem->Mat = mMaterials["ice"].get();
         rightSphereRitem->Geo = mGeometries["shapeGeo"].get();
         rightSphereRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
