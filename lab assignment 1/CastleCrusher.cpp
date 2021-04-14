@@ -52,6 +52,8 @@ struct RenderItem
     UINT IndexCount = 0;
     UINT StartIndexLocation = 0;
     int BaseVertexLocation = 0;
+	
+    BoundingBox bounds;
 };
 
 enum class RenderLayer : int
@@ -89,6 +91,7 @@ private:
     void UpdateMaterialCBs(const GameTimer& gt);
     void UpdateMainPassCB(const GameTimer& gt);
     void UpdateWaves(const GameTimer& gt);
+    void CameraCollisionCheck(const XMVECTOR np1, const XMVECTOR np2);
 
     void LoadTextures();
     void BuildRootSignature();
@@ -206,7 +209,8 @@ bool ShapesApp::Initialize()
 
     mWaves = std::make_unique<Waves>(128, 128, 1.0f, 0.03f, 4.0f, 0.2f);
 
-    mCamera.SetPosition(0.0f, 2.0f, -15.0f);
+    mCamera.SetPosition(0.0f, 30.0f, -50.0f);
+    XMStoreFloat3(&mCamera.bounds.Center, mCamera.GetPosition());
 
     LoadTextures();
     BuildRootSignature();
@@ -425,6 +429,8 @@ void ShapesApp::OnKeyboardInput(const GameTimer& gt)
 
     const float dt = gt.DeltaTime();
 
+    XMVECTOR oldPos = mCamera.GetPosition();
+
     //GetAsyncKeyState returns a short (2 bytes)
     if (GetAsyncKeyState('W') & 0x8000) //most significant bit (MSB) is 1 when key is pressed (1000 000 000 000)
         mCamera.Walk(10.0f * dt);
@@ -443,6 +449,11 @@ void ShapesApp::OnKeyboardInput(const GameTimer& gt)
 
     if (GetAsyncKeyState('E') & 0x8000)
         mCamera.Pedestal(-10.0f * dt);
+
+    if (!XMVector3Equal(oldPos, mCamera.GetPosition()))
+    {
+        CameraCollisionCheck(mCamera.GetPosition(),oldPos);
+    }
 
     mCamera.UpdateViewMatrix();
 }
@@ -475,6 +486,31 @@ void ShapesApp::UpdateCamera(const GameTimer& gt)
         upVec); // Up vector);
 
     XMStoreFloat4x4(&mView, view);*/
+}
+
+void ShapesApp::CameraCollisionCheck(const XMVECTOR np1, const XMVECTOR np2)
+{
+    BoundingBox newBounds;
+    XMStoreFloat3(&newBounds.Center, np1);
+    newBounds.Extents = { 2.5f, 2.5f, 2.5f };
+
+    //check collision, leave if it happens
+    for (auto& e : mAllRitems)
+    {
+        if (e->bounds.Contains(newBounds) != DISJOINT)
+        {
+            XMFLOAT3 OldPos;
+            XMStoreFloat3(&OldPos, np2);
+            mCamera.SetPosition(OldPos);
+            return;
+        }
+    }
+
+    //move camera
+    XMFLOAT3 storeNewPos;
+    XMStoreFloat3(&storeNewPos, np1);
+    mCamera.SetPosition(storeNewPos);
+
 }
 
 void ShapesApp::AnimateMaterials(const GameTimer& gt)
@@ -1869,6 +1905,8 @@ void ShapesApp::BuildRenderItems()
     pyramidRitem->IndexCount = pyramidRitem->Geo->DrawArgs["pyramid"].IndexCount;
     pyramidRitem->StartIndexLocation = pyramidRitem->Geo->DrawArgs["pyramid"].StartIndexLocation;
     pyramidRitem->BaseVertexLocation = pyramidRitem->Geo->DrawArgs["pyramid"].BaseVertexLocation;
+    //pyramidRitem->bounds.Center = { 0.0f, 10.0f, 0.0f };
+    //pyramidRitem->bounds.Extents = { 12.5f, 12.5f, 12.5f };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(pyramidRitem.get());
     mAllRitems.push_back(std::move(pyramidRitem));
 
