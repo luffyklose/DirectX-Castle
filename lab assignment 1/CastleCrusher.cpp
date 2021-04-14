@@ -209,9 +209,8 @@ bool ShapesApp::Initialize()
 
     mWaves = std::make_unique<Waves>(128, 128, 1.0f, 0.03f, 4.0f, 0.2f);
 
-    mCamera.SetPosition(0.0f, 30.0f, -50.0f);
+    mCamera.SetPosition(0.0f, 10.0f, -120.0f);
     XMStoreFloat3(&mCamera.bounds.Center, mCamera.GetPosition());
-    XMStoreFloat3(&mCamera.bounds.Extents, {1.0f,1.0f,1.0f});
 
     LoadTextures();
     BuildRootSignature();
@@ -493,7 +492,7 @@ void ShapesApp::CameraCollisionCheck(const XMVECTOR np1, const XMVECTOR np2)
 {
     BoundingBox newBounds;
     XMStoreFloat3(&newBounds.Center, np1);
-    newBounds.Extents = { 2.5f, 2.5f, 2.5f };
+    newBounds.Extents = { 1.5f, 0.1, 1.5f };
 
     //check collision, leave if it happens
     for (auto& e : mAllRitems)
@@ -1035,7 +1034,7 @@ void ShapesApp::BuildShapeGeometry()
 {
     GeometryGenerator geoGen;
     GeometryGenerator::MeshData box = geoGen.CreateBox(1.5f, 0.5f, 1.5f, 3);
-    GeometryGenerator::MeshData grid = geoGen.CreateGrid(100.0f, 100.0f, 50, 50);
+    GeometryGenerator::MeshData grid = geoGen.CreateGrid(100.0f, 300.0f, 50, 50);
     GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
     GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(2.5f, 2.5f, 18.5f, 20, 20);
     GeometryGenerator::MeshData cone = geoGen.CreateCylinder(2.5f, 0.01f, 5.0f, 20, 20);
@@ -2060,6 +2059,318 @@ void ShapesApp::BuildRenderItems()
         mAllRitems.push_back(std::move(rightSphereRitem));
     }
 
+    //left maze wall
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 35.0f) * XMMatrixTranslation(-25.0f, 7.5f, -75.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { -25.0f, 7.5f, -75.0f };
+    boxRitem->bounds.Extents = { 1.5f, 30.0f, 35.0f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    //right maze wall
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 35.0f) * XMMatrixTranslation(27.5f, 7.5f, -75.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { 27.5f, 7.5f, -75.0f };
+    boxRitem->bounds.Extents = { 1.5f, 30.0f, 35.0f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(15.0f, 30.0f, 1.5f) * XMMatrixTranslation(17.0f, 7.5f, -50.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { 17.0f, 7.5f, -50.0f };
+    boxRitem->bounds.Extents = { 115.0f, 30.0f, 1.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(17.5f, 30.0f, 1.5f) * XMMatrixTranslation(-12.5f, 7.5f, -50.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { -12.5f, 7.5f, -50.0f };
+    boxRitem->bounds.Extents = { 17.5f, 30.0f, 1.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(5.0f, 30.0f, 1.5f) * XMMatrixTranslation(-20.0f, 7.5f, -60.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { -20.0f, 7.5f, -60.0f };
+    boxRitem->bounds.Extents = { 5.0f, 30.0f, 1.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(2.5f, 30.0f, 1.5f) * XMMatrixTranslation(-21.5f, 7.5f, -80.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { -21.5f, 7.5f, -80.0f };
+    boxRitem->bounds.Extents = { 2.5f, 30.0f, 1.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 17.5f) * XMMatrixTranslation(-15.0f, 7.5f, -72.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { -15.0f, 7.5f, -72.0f };
+    boxRitem->bounds.Extents = { 21.5f, 30.0f, 17.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 7.5f) * XMMatrixTranslation(-15.0f, 7.5f, -95.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { 15.0f, 7.5f, -95.0f };
+    boxRitem->bounds.Extents = { 1.5f, 30.0f, 7.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(7.5f, 30.0f, 1.5f) * XMMatrixTranslation(-10.25f, 7.5f, -70.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { -10.25f, 7.5f, -70.0f };
+    boxRitem->bounds.Extents = { 7.5f, 30.0f, 1.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(5.0f, 30.0f, 1.5f) * XMMatrixTranslation(-11.5f, 7.5f, -95.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { -11.5f, 7.5f, -95.0f };
+    boxRitem->bounds.Extents = { 5.0f, 30.0f, 1.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 7.5f) * XMMatrixTranslation(0.0f, 7.5f, -56.5f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { 0.0f, 7.5f, -56.5f };
+    boxRitem->bounds.Extents = { 1.5f, 30.0f, 7.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(7.5f, 30.0f, 1.5f) * XMMatrixTranslation(9.25f, 7.5f, -70.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { 9.25f, 7.5f, -70.0f };
+    boxRitem->bounds.Extents = { 7.5f, 30.0f, 1.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 25.5f) * XMMatrixTranslation(13.5f, 7.5f, -75.5f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { 13.5f, 7.5f, -75.5f };
+    boxRitem->bounds.Extents = { 1.5f, 30.0f, 25.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(7.5f, 30.0f, 1.5f) * XMMatrixTranslation(20.0f, 7.5f, -100.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { 20.0f, 7.5f, -100.0f };
+    boxRitem->bounds.Extents = { 7.5f, 30.0f, 1.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(20.5f, 30.0f, 1.5f) * XMMatrixTranslation(-10.5f, 7.5f, -100.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { -10.5f, 7.5f, -100.0f };
+    boxRitem->bounds.Extents = { 20.5f, 30.0f, 1.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 7.5f) * XMMatrixTranslation(0.0f, 7.5f, -94.5f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { 0.0f, 7.5f, -94.5f };
+    boxRitem->bounds.Extents = { 1.5f, 30.0f, 7.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(7.5f, 30.0f, 1.5f) * XMMatrixTranslation(0.0f, 7.5f, -90.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { 0.0f, 7.5f, -90.0f };
+    boxRitem->bounds.Extents = { 7.5f, 30.0f, 1.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(7.5f, 30.0f, 1.5f) * XMMatrixTranslation(0.0f, 7.5f, -80.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { 0.0f, 7.5f, -80.0f };
+    boxRitem->bounds.Extents = { 7.5f, 30.0f, 1.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 2.5f) * XMMatrixTranslation(5.0f, 7.5f, -81.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { 5.0f, 7.5f, -81.0f };
+    boxRitem->bounds.Extents = { 1.5f, 30.0f, 2.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 2.5f) * XMMatrixTranslation(-5.0f, 7.5f, -81.0f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { -5.0f, 7.5f, -81.0f };
+    boxRitem->bounds.Extents = { 1.5f, 30.0f, 2.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 2.5f) * XMMatrixTranslation(5.0f, 7.5f, -89.25f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { 5.0f, 7.5f, -89.25f };
+    boxRitem->bounds.Extents = { 1.5f, 30.0f, 2.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+
+    boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 2.5f) * XMMatrixTranslation(-5.0f, 7.5f, -89.25f));
+    boxRitem->ObjCBIndex = Index++;
+    boxRitem->Mat = mMaterials["grass"].get();
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    boxRitem->bounds.Center = { -5.0f, 7.5f, -89.25f };
+    boxRitem->bounds.Extents = { 1.5f, 30.0f, 2.5f };
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    mAllRitems.push_back(std::move(boxRitem));
+    
     // All the render items are opaque.
     /*for (auto& e : mAllRitems)
         mOpaqueRitems.push_back(e.get());*/
