@@ -18,6 +18,7 @@ using namespace DirectX::PackedVector;
 #pragma comment(lib, "D3D12.lib")
 
 const int gNumFrameResources = 3;
+const int CSpeed = 10.0f;
 
 // Lightweight structure stores parameters to draw a shape.  This will
 // vary from app-to-app.
@@ -433,22 +434,22 @@ void ShapesApp::OnKeyboardInput(const GameTimer& gt)
 
     //GetAsyncKeyState returns a short (2 bytes)
     if (GetAsyncKeyState('W') & 0x8000) //most significant bit (MSB) is 1 when key is pressed (1000 000 000 000)
-        mCamera.Walk(10.0f * dt);
+        mCamera.Walk(CSpeed * dt);
 
     if (GetAsyncKeyState('S') & 0x8000)
-        mCamera.Walk(-10.0f * dt);
+        mCamera.Walk(-CSpeed * dt);
 
     if (GetAsyncKeyState('A') & 0x8000)
-        mCamera.Strafe(-10.0f * dt);
+        mCamera.Strafe(-CSpeed * dt);
 
     if (GetAsyncKeyState('D') & 0x8000)
-        mCamera.Strafe(10.0f * dt);
+        mCamera.Strafe(CSpeed * dt);
 
     if (GetAsyncKeyState('Q') & 0x8000)
-        mCamera.Pedestal(10.0f * dt);
+        mCamera.Pedestal(CSpeed * dt);
 
     if (GetAsyncKeyState('E') & 0x8000)
-        mCamera.Pedestal(-10.0f * dt);
+        mCamera.Pedestal(-CSpeed * dt);
 
     if (!XMVector3Equal(oldPos, mCamera.GetPosition()))
     {
@@ -2059,6 +2060,8 @@ void ShapesApp::BuildRenderItems()
         mAllRitems.push_back(std::move(rightSphereRitem));
     }
 
+    float downscaleFactor = 0.725f;
+	
     //left maze wall
     boxRitem = std::make_unique<RenderItem>();
     XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 35.0f) * XMMatrixTranslation(-25.0f, 7.5f, -75.0f));
@@ -2070,7 +2073,7 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { -25.0f, 7.5f, -75.0f };
-    boxRitem->bounds.Extents = { 1.5f, 30.0f, 35.0f };
+    boxRitem->bounds.Extents = { 1.5f, 8.5f, 35.0f * downscaleFactor};
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
@@ -2085,12 +2088,12 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { 27.5f, 7.5f, -75.0f };
-    boxRitem->bounds.Extents = { 1.5f, 30.0f, 35.0f };
+    boxRitem->bounds.Extents = { 1.5f, 8.5f, 35.0f * downscaleFactor};
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
     boxRitem = std::make_unique<RenderItem>();
-    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(15.0f, 30.0f, 1.5f) * XMMatrixTranslation(17.0f, 7.5f, -50.0f));
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(10.0f, 30.0f, 1.5f) * XMMatrixTranslation(20.0f, 7.5f, -50.0f));
     boxRitem->ObjCBIndex = Index++;
     boxRitem->Mat = mMaterials["grass"].get();
     boxRitem->Geo = mGeometries["shapeGeo"].get();
@@ -2098,8 +2101,8 @@ void ShapesApp::BuildRenderItems()
     boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
-    boxRitem->bounds.Center = { 17.0f, 7.5f, -50.0f };
-    boxRitem->bounds.Extents = { 115.0f, 30.0f, 1.5f };
+    boxRitem->bounds.Center = { 20.0f, 7.5f, -50.0f };
+    boxRitem->bounds.Extents = { 10.0f * downscaleFactor, 8.5f, 1.5f };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
@@ -2113,7 +2116,7 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { -12.5f, 7.5f, -50.0f };
-    boxRitem->bounds.Extents = { 17.5f, 30.0f, 1.5f };
+    boxRitem->bounds.Extents = { 17.5f * downscaleFactor, 8.5f, 1.5f };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
@@ -2127,7 +2130,7 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { -20.0f, 7.5f, -60.0f };
-    boxRitem->bounds.Extents = { 5.0f, 30.0f, 1.5f };
+    boxRitem->bounds.Extents = { 5.0f * downscaleFactor, 8.5f, 1.5f };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
@@ -2141,7 +2144,7 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { -21.5f, 7.5f, -80.0f };
-    boxRitem->bounds.Extents = { 2.5f, 30.0f, 1.5f };
+    boxRitem->bounds.Extents = { 2.5f * downscaleFactor, 8.5f, 1.5f };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
@@ -2155,12 +2158,12 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { -15.0f, 7.5f, -72.0f };
-    boxRitem->bounds.Extents = { 21.5f, 30.0f, 17.5f };
+    boxRitem->bounds.Extents = { 1.5f , 8.5f, 17.5f * downscaleFactor };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
     boxRitem = std::make_unique<RenderItem>();
-    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 7.5f) * XMMatrixTranslation(-15.0f, 7.5f, -95.0f));
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 5.0f) * XMMatrixTranslation(-15.0f, 7.5f, -95.0f));
     boxRitem->ObjCBIndex = Index++;
     boxRitem->Mat = mMaterials["grass"].get();
     boxRitem->Geo = mGeometries["shapeGeo"].get();
@@ -2169,7 +2172,7 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { 15.0f, 7.5f, -95.0f };
-    boxRitem->bounds.Extents = { 1.5f, 30.0f, 7.5f };
+    boxRitem->bounds.Extents = { 1.5f, 8.5f, 5.0f * downscaleFactor };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
@@ -2183,7 +2186,7 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { -10.25f, 7.5f, -70.0f };
-    boxRitem->bounds.Extents = { 7.5f, 30.0f, 1.5f };
+    boxRitem->bounds.Extents = { 7.5f * downscaleFactor, 8.5f, 1.5f };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
@@ -2197,7 +2200,7 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { -11.5f, 7.5f, -95.0f };
-    boxRitem->bounds.Extents = { 5.0f, 30.0f, 1.5f };
+    boxRitem->bounds.Extents = { 5.0f * downscaleFactor, 8.5f, 1.5f };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
@@ -2211,7 +2214,7 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { 0.0f, 7.5f, -56.5f };
-    boxRitem->bounds.Extents = { 1.5f, 30.0f, 7.5f };
+    boxRitem->bounds.Extents = { 1.5f, 8.5f, 7.5f * downscaleFactor };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
@@ -2225,12 +2228,12 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { 9.25f, 7.5f, -70.0f };
-    boxRitem->bounds.Extents = { 7.5f, 30.0f, 1.5f };
+    boxRitem->bounds.Extents = { 7.5f * downscaleFactor, 8.5f, 1.5f };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
     boxRitem = std::make_unique<RenderItem>();
-    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 25.5f) * XMMatrixTranslation(13.5f, 7.5f, -75.5f));
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 15.5f) * XMMatrixTranslation(13.5f, 7.5f, -75.5f));
     boxRitem->ObjCBIndex = Index++;
     boxRitem->Mat = mMaterials["grass"].get();
     boxRitem->Geo = mGeometries["shapeGeo"].get();
@@ -2239,13 +2242,12 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { 13.5f, 7.5f, -75.5f };
-    boxRitem->bounds.Extents = { 1.5f, 30.0f, 25.5f };
+    boxRitem->bounds.Extents = { 1.5f, 8.5f, 15.5f * downscaleFactor};
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
-
     boxRitem = std::make_unique<RenderItem>();
-    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(7.5f, 30.0f, 1.5f) * XMMatrixTranslation(20.0f, 7.5f, -100.0f));
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(7.5f, 30.0f, 1.5f) * XMMatrixTranslation(21.0f, 7.5f, -100.0f));
     boxRitem->ObjCBIndex = Index++;
     boxRitem->Mat = mMaterials["grass"].get();
     boxRitem->Geo = mGeometries["shapeGeo"].get();
@@ -2253,13 +2255,13 @@ void ShapesApp::BuildRenderItems()
     boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
-    boxRitem->bounds.Center = { 20.0f, 7.5f, -100.0f };
-    boxRitem->bounds.Extents = { 7.5f, 30.0f, 1.5f };
+    boxRitem->bounds.Center = { 21.0f, 7.5f, -100.0f };
+    boxRitem->bounds.Extents = { 7.5f * downscaleFactor, 8.5f, 1.5f };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
     boxRitem = std::make_unique<RenderItem>();
-    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(20.5f, 30.0f, 1.5f) * XMMatrixTranslation(-10.5f, 7.5f, -100.0f));
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(20.5f, 30.0f, 1.5f) * XMMatrixTranslation(-8.5f, 7.5f, -100.0f));
     boxRitem->ObjCBIndex = Index++;
     boxRitem->Mat = mMaterials["grass"].get();
     boxRitem->Geo = mGeometries["shapeGeo"].get();
@@ -2267,8 +2269,8 @@ void ShapesApp::BuildRenderItems()
     boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
-    boxRitem->bounds.Center = { -10.5f, 7.5f, -100.0f };
-    boxRitem->bounds.Extents = { 20.5f, 30.0f, 1.5f };
+    boxRitem->bounds.Center = { -8.5f, 7.5f, -100.0f };
+    boxRitem->bounds.Extents = { 20.5f * downscaleFactor, 8.5f, 1.5f };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
@@ -2282,10 +2284,11 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { 0.0f, 7.5f, -94.5f };
-    boxRitem->bounds.Extents = { 1.5f, 30.0f, 7.5f };
+    boxRitem->bounds.Extents = { 1.5f, 8.5f, 7.5f * downscaleFactor };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
+	//checked
     boxRitem = std::make_unique<RenderItem>();
     XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(7.5f, 30.0f, 1.5f) * XMMatrixTranslation(0.0f, 7.5f, -90.0f));
     boxRitem->ObjCBIndex = Index++;
@@ -2296,12 +2299,12 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { 0.0f, 7.5f, -90.0f };
-    boxRitem->bounds.Extents = { 7.5f, 30.0f, 1.5f };
+    boxRitem->bounds.Extents = { 7.5f * downscaleFactor, 8.5f, 1.5f };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
     boxRitem = std::make_unique<RenderItem>();
-    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(7.5f, 30.0f, 1.5f) * XMMatrixTranslation(0.0f, 7.5f, -80.0f));
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(7.5f, 30.0f, 1.5f) * XMMatrixTranslation(0.0f, 7.5f, -77.0f));
     boxRitem->ObjCBIndex = Index++;
     boxRitem->Mat = mMaterials["grass"].get();
     boxRitem->Geo = mGeometries["shapeGeo"].get();
@@ -2309,13 +2312,13 @@ void ShapesApp::BuildRenderItems()
     boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
-    boxRitem->bounds.Center = { 0.0f, 7.5f, -80.0f };
-    boxRitem->bounds.Extents = { 7.5f, 30.0f, 1.5f };
+    boxRitem->bounds.Center = { 0.0f, 7.5f, -77.0f };
+    boxRitem->bounds.Extents = { 7.5f * downscaleFactor, 8.5f, 1.5f };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
     boxRitem = std::make_unique<RenderItem>();
-    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 2.5f) * XMMatrixTranslation(5.0f, 7.5f, -81.0f));
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 2.5f) * XMMatrixTranslation(5.0f, 7.5f, -78.0f));
     boxRitem->ObjCBIndex = Index++;
     boxRitem->Mat = mMaterials["grass"].get();
     boxRitem->Geo = mGeometries["shapeGeo"].get();
@@ -2323,13 +2326,13 @@ void ShapesApp::BuildRenderItems()
     boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
-    boxRitem->bounds.Center = { 5.0f, 7.5f, -81.0f };
-    boxRitem->bounds.Extents = { 1.5f, 30.0f, 2.5f };
+    boxRitem->bounds.Center = { 5.0f, 7.5f, -78.0f };
+    boxRitem->bounds.Extents = { 1.5f, 8.5f, 2.5f * downscaleFactor };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
     boxRitem = std::make_unique<RenderItem>();
-    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 2.5f) * XMMatrixTranslation(-5.0f, 7.5f, -81.0f));
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 2.5f) * XMMatrixTranslation(-5.0f, 7.5f, -78.0f));
     boxRitem->ObjCBIndex = Index++;
     boxRitem->Mat = mMaterials["grass"].get();
     boxRitem->Geo = mGeometries["shapeGeo"].get();
@@ -2337,11 +2340,10 @@ void ShapesApp::BuildRenderItems()
     boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
-    boxRitem->bounds.Center = { -5.0f, 7.5f, -81.0f };
-    boxRitem->bounds.Extents = { 1.5f, 30.0f, 2.5f };
+    boxRitem->bounds.Center = { -5.0f, 7.5f, -78.0f };
+    boxRitem->bounds.Extents = { 1.5f, 8.5f, 2.5f * downscaleFactor };
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
-
 
     boxRitem = std::make_unique<RenderItem>();
     XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.5f, 30.0f, 2.5f) * XMMatrixTranslation(5.0f, 7.5f, -89.25f));
@@ -2353,7 +2355,7 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { 5.0f, 7.5f, -89.25f };
-    boxRitem->bounds.Extents = { 1.5f, 30.0f, 2.5f };
+    boxRitem->bounds.Extents = { 1.5f, 8.5f, 2.5f * downscaleFactor};
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
 
@@ -2367,7 +2369,7 @@ void ShapesApp::BuildRenderItems()
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
     boxRitem->bounds.Center = { -5.0f, 7.5f, -89.25f };
-    boxRitem->bounds.Extents = { 1.5f, 30.0f, 2.5f };
+    boxRitem->bounds.Extents = { 1.5f, 8.5f, 2.5f * downscaleFactor};
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
     
