@@ -297,4 +297,27 @@ void Camera::UpdateViewMatrix()
 	}
 }
 
+DirectX::XMVECTOR Camera::GetNewPosDifference(float d, moveType type)
+{
+	XMVECTOR s = XMVectorReplicate(d);
+	XMVECTOR dir;
+	XMVECTOR p = XMLoadFloat3(&mPosition);
 
+	switch (type)
+	{
+	case walk:
+		XMFLOAT3 dirF = mLook;
+		dirF.y = 0.0f;
+		dir = XMLoadFloat3(&dirF);
+
+		break;
+	case strafe:
+		dir = XMLoadFloat3(&mRight);
+		break;
+	case pedestal:
+		dir = XMLoadFloat3(&mUp);
+		break;
+	}
+	XMVECTOR curPos = XMLoadFloat3(&mPosition);
+	return  XMVectorMultiplyAdd(s, dir, p) - curPos;
+}

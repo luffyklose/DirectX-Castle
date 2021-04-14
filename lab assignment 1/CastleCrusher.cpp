@@ -8,6 +8,7 @@
 #include "../Common/GeometryGenerator.h"
 #include "FrameResource.h"
 #include "Waves.h"
+#include "../Common/Camera.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
@@ -17,6 +18,13 @@ using namespace DirectX::PackedVector;
 #pragma comment(lib, "D3D12.lib")
 
 const int gNumFrameResources = 3;
+
+typedef struct DIMOUSESTATE {
+    LONG lX;
+    LONG lY;
+    LONG lZ;
+    BYTE rgbButtons[4];
+} DIMOUSESTATE, * LPDIMOUSESTATE;
 
 // Lightweight structure stores parameters to draw a shape.  This will
 // vary from app-to-app.
@@ -29,6 +37,8 @@ struct RenderItem
     // relative to the world space, which defines the position, orientation,
     // and scale of the object in the world.
     XMFLOAT4X4 World = MathHelper::Identity4x4();
+
+    XMFLOAT4X4 TWorld = MathHelper::Identity4x4();
 
     XMFLOAT4X4 TexTransform = MathHelper::Identity4x4();
 
@@ -51,6 +61,7 @@ struct RenderItem
     UINT IndexCount = 0;
     UINT StartIndexLocation = 0;
     int BaseVertexLocation = 0;
+    BoundingBox bounds;
 };
 
 enum class RenderLayer : int
@@ -72,6 +83,24 @@ public:
 
     virtual bool Initialize()override;
 
+    Camera FpsCam = Camera();
+    XMVECTOR DefaultForward = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+    XMVECTOR DefaultRight = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+    XMVECTOR DefaultUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+    XMVECTOR camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    XMVECTOR camForward = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+    XMVECTOR camRight = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+    DIMOUSESTATE mouse_state;
+    XMMATRIX camRotationMatrix;
+    XMMATRIX groundWorld;
+
+    float moveLeftRight = 0.0f;
+    float moveBackForward = 0.0f;
+
+    float camYaw = 0.0f;
+    float camPitch = 0.0f;
+
 private:
     virtual void OnResize()override;
     virtual void Update(const GameTimer& gt)override;
@@ -88,6 +117,7 @@ private:
     void UpdateMaterialCBs(const GameTimer& gt);
     void UpdateMainPassCB(const GameTimer& gt);
     void UpdateWaves(const GameTimer& gt);
+    void CameraCollisionCheck(const XMVECTOR np);
 
     void LoadTextures();
     void BuildRootSignature();
@@ -196,6 +226,12 @@ bool ShapesApp::Initialize()
     // so we have to query this information.
     mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
+    FpsCam.LookAt(
+        XMFLOAT3(15.0f, 7.0f, -430.0f),
+        XMFLOAT3(0.0f, 0.0f, 0.0f),
+        XMFLOAT3(0.0f, 1.0f, 0.0f));
+    XMStoreFloat3(&FpsCam.bounds.Center, FpsCam.GetPosition());
+	
     mWaves = std::make_unique<Waves>(128, 128, 1.0f, 0.03f, 4.0f, 0.2f);
 
     LoadTextures();
@@ -228,12 +264,14 @@ void ShapesApp::OnResize()
     // The window resized, so update the aspect ratio and recompute the projection matrix.
     XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
     XMStoreFloat4x4(&mProj, P);
+
+    FpsCam.SetLens(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
 }
 
 void ShapesApp::Update(const GameTimer& gt)
 {
     OnKeyboardInput(gt);
-    UpdateCamera(gt);
+    //UpdateCamera(gt);
 
     // Cycle through the circular frame resource array.
     mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % gNumFrameResources;
@@ -380,6 +418,38 @@ void ShapesApp::OnMouseMove(WPARAM btnState, int x, int y)
 
 void ShapesApp::OnKeyboardInput(const GameTimer& gt)
 {
+    const float dt = gt.DeltaTime();
+    const float cSpeed = 30.0f * dt;
+    XMVECTOR newPos = FpsCam.GetPosition();
+
+    //movement input collects changes from the current camera pos
+    if (GetAsyncKeyState('W') & 0x8000) //most significant bit (MSB) is 1 when key is pressed (1000 000 000 000)
+        newPos += FpsCam.GetNewPosDifference(cSpeed, walk);
+
+    if (GetAsyncKeyState('S') & 0x8000)
+        newPos += FpsCam.GetNewPosDifference(-cSpeed, walk);
+
+    if (GetAsyncKeyState('A') & 0x8000)
+        newPos += FpsCam.GetNewPosDifference(-cSpeed, strafe);
+
+    if (GetAsyncKeyState('D') & 0x8000)
+        newPos += FpsCam.GetNewPosDifference(cSpeed, strafe);
+
+    if (GetAsyncKeyState('Q') & 0x8000)
+        newPos += FpsCam.GetNewPosDifference(-cSpeed, pedestal);
+
+    if (GetAsyncKeyState('E') & 0x8000)
+        newPos += FpsCam.GetNewPosDifference(cSpeed, pedestal);
+
+    //if no input skip  the collision check
+    if (!XMVector3Equal(newPos, FpsCam.GetPosition()))
+    {
+        CameraCollisionCheck(newPos);
+    }
+
+    FpsCam.UpdateViewMatrix();
+
+    return;
 }
 
 void ShapesApp::UpdateCamera(const GameTimer& gt)
@@ -396,6 +466,28 @@ void ShapesApp::UpdateCamera(const GameTimer& gt)
 
     XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
     XMStoreFloat4x4(&mView, view);
+}
+
+void ShapesApp::CameraCollisionCheck(const XMVECTOR np)
+{
+    BoundingBox newBounds;
+    XMStoreFloat3(&newBounds.Center, np);
+    newBounds.Extents = { 2.5f, 2.5f, 2.5f };
+
+    //check collision, leave if it happens
+    for (auto& e : mAllRitems)
+    {
+        if (e->bounds.Contains(newBounds) != DISJOINT)
+        {
+            return;
+        }
+    }
+
+    //move camera
+    XMFLOAT3 storeNewPos;
+    XMStoreFloat3(&storeNewPos, np);
+    FpsCam.SetPosition(storeNewPos);
+
 }
 
 void ShapesApp::AnimateMaterials(const GameTimer& gt)
@@ -425,6 +517,12 @@ void ShapesApp::AnimateMaterials(const GameTimer& gt)
 void ShapesApp::UpdateObjectCBs(const GameTimer& gt)
 {
     auto currObjectCB = mCurrFrameResource->ObjectCB.get();
+
+    XMMATRIX view = FpsCam.GetView();
+    XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
+
+    auto currInstanceBuffer = mCurrFrameResource->ObjectCB.get();
+	
     for (auto& e : mAllRitems)
     {
         // Only update the cbuffer data if the constants have changed.  
@@ -432,10 +530,12 @@ void ShapesApp::UpdateObjectCBs(const GameTimer& gt)
         if (e->NumFramesDirty > 0)
         {
             XMMATRIX world = XMLoadFloat4x4(&e->World);
+        	
             XMMATRIX texTransform = XMLoadFloat4x4(&e->TexTransform);
-
+            XMMATRIX tWorld = XMLoadFloat4x4(&e->TWorld);
             ObjectConstants objConstants;
             XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
+            XMStoreFloat4x4(&objConstants.TWorld, XMMatrixTranspose(MathHelper::InverseTranspose(world)));
             XMStoreFloat4x4(&objConstants.TexTransform, XMMatrixTranspose(texTransform));
 
             currObjectCB->CopyData(e->ObjCBIndex, objConstants);
@@ -488,7 +588,8 @@ void ShapesApp::UpdateMainPassCB(const GameTimer& gt)
     XMStoreFloat4x4(&mMainPassCB.InvProj, XMMatrixTranspose(invProj));
     XMStoreFloat4x4(&mMainPassCB.ViewProj, XMMatrixTranspose(viewProj));
     XMStoreFloat4x4(&mMainPassCB.InvViewProj, XMMatrixTranspose(invViewProj));
-    mMainPassCB.EyePosW = mEyePos;
+    //mMainPassCB.EyePosW = mEyePos;
+    mMainPassCB.EyePosW = FpsCam.GetPosition3f();
     mMainPassCB.RenderTargetSize = XMFLOAT2((float)mClientWidth, (float)mClientHeight);
     mMainPassCB.InvRenderTargetSize = XMFLOAT2(1.0f / mClientWidth, 1.0f / mClientHeight);
     mMainPassCB.NearZ = 1.0f;
